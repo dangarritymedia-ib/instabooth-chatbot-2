@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-03-03",
+  "faqs": [
+    {
+      "id": "faq_001",
+      "keywords": ["how", "work", "booth", "operate", "function", "digital", "selfie"],
+      "question": "How does your booth work?",
+      "answer": "We are 100% Digital Selfie Booth. We run every event unattended with someone on call just in case. Photos are sent directly from the booth to your phone via wifi & a full gallery is sent to whoever made the booking."
+    },
+    {
+      "id": "faq_002",
+      "keywords": ["custom", "graphics", "design", "template", "extra", "cost", "charge"],
+      "question": "Does it cost extra to get custom graphics for our event?",
+      "answer": "NO. Every event gets custom graphics FREE."
+    },
+    {
+      "id": "faq_003",
+      "keywords": ["space", "room", "size", "dimensions", "fit", "area", "big", "large", "small"],
+      "question": "How much space does it take up?",
+      "answer": "The background is 8ft by 8ft and goes flat against the wall. Instabooth is positioned about 6 feet away from the background. If height is an issue we do not need to use one of our backgrounds and you can DIY one if needed or the wedding decorator can create something that works."
+    },
+    {
+      "id": "faq_004",
+      "keywords": ["need", "require", "setup", "set up", "power", "wifi", "electricity", "requirements"],
+      "question": "What do you need to be able to set up at our event?",
+      "answer": "We need a power source, a wifi connection & to be protected from the elements."
+    },
+    {
+      "id": "faq_005",
+      "keywords": ["outside", "outdoor", "tent", "garden", "patio", "rain", "weather", "elements"],
+      "question": "Can it go outside?",
+      "answer": "Yes it can go outside but it needs to be under a tent or awning. Generally the backgrounds won't work in a tent unless it's super tall as the backdrops are 8ft high. Either the decorator will need to come up with a backdrop, you can DIY one or the white wall of the tent usually works fine too. Wifi can sometimes be an issue depending on how far away the tent is from the router or modem. All photos are saved to the device and will send out once the photobooth gets back to the office after the event."
+    },
+    {
+      "id": "faq_006",
+      "keywords": ["wifi", "no wifi", "internet", "connection", "offline", "signal"],
+      "question": "What happens if there is no wifi?",
+      "answer": "All photos are saved to the device and will send out once the photobooth gets back to the office after the event."
+    },
+    {
+      "id": "faq_007",
+      "keywords": ["outside", "thunder bay", "travel", "distance", "far", "deliver", "location", "rent", "ship"],
+      "question": "Do you rent outside of Thunder Bay?",
+      "answer": "Yes we can either send the photobooth with someone from the wedding party with a how-to video for set up, or we can come do set up and teardown for an added charge. It all depends on how far away the event is."
+    }
+  ],
+  "pricing_redirect": "Send us a message and we'll build a custom quote for your event.",
+  "fallback_response": "That's a great question! I don't have a specific answer for that one yet, but our team would love to help. Send us a message through our contact page and we'll get back to you quickly.",
+  "pricing_keywords": ["price", "pricing", "cost", "how much", "rate", "rates", "package", "packages", "quote", "fee", "fees", "charge", "affordable", "expensive", "budget", "deal", "discount", "deposit", "payment"],
+  "restricted_topics": ["We don't provide specific pricing through the chatbot.", "We can't make guarantees about availability without checking our calendar.", "We don't share other clients' event details."]
+}
