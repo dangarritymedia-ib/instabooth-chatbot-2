@@ -61,11 +61,17 @@ function findBestFAQMatch(userQuestion, faqData) {
     questionLower.includes(loc)
   );
 
-  // Also check locations in the FAQ database keywords
+  // Also check locations in the FAQ database keywords — but ONLY actual place names,
+  // not generic phrases like "how far" or "out of town" which could match other questions
+  const GENERIC_TRAVEL_PHRASES = [
+    "travel", "remote", "delivery", "deliver", "pickup", "rent",
+    "out of town", "outside thunder bay", "self serve", "come to",
+    "drive to", "how far", "far", "distance", "ship"
+  ];
   const faq006 = faqData.faqs.find(f => f.id === "faq_006");
   const dbLocationMatch = faq006 ? faq006.keywords.find(kw =>
     kw.length > 4 && questionLower.includes(kw) &&
-    !["travel", "remote", "delivery", "deliver", "pickup", "rent"].includes(kw)
+    !GENERIC_TRAVEL_PHRASES.includes(kw)
   ) : null;
 
   if (mentionedLocation || dbLocationMatch) {
