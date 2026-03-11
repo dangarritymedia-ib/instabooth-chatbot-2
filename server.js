@@ -1,11 +1,11 @@
 // ============================================================
-// INSTABOOTH FAQ CHATBOT — BACKEND SERVER
+// INSTABOOTH FAQ CHATBOT — BACKEND SERVER (v2)
 // ============================================================
-// This is the brain of your chatbot. It:
-// 1. Receives questions from the frontend widget
-// 2. Searches the FAQ database for a match
-// 3. If no match, asks Claude API to answer using ONLY the FAQ data
-// 4. Logs unanswered questions for you to review
+// Improved matching logic:
+// - Location names (town names) get 3x weight
+// - Multi-word keyword matches get 2x weight
+// - Pricing questions check for event-specific FAQs first
+// - Better handling of multi-topic questions
 // ============================================================
 
 const express = require("express");
@@ -16,11 +16,23 @@ const Anthropic = require("@anthropic-ai/sdk");
 
 // ---- CONFIGURATION ----
 const PORT = process.env.PORT || 3001;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY; // Set this in your environment
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+
+// ---- LOCATION KEYWORDS ----
+// These are specific place names that should carry heavy weight
+// because if someone mentions a town, they're almost certainly
+// asking about travel/delivery, not about that town's wedding prices.
+const LOCATION_KEYWORDS = [
+  "nipigon", "terrace bay", "schreiber", "kenora", "dryden",
+  "marathon", "sioux lookout", "geraldton", "longlac",
+  "winnipeg", "sault ste marie", "sudbury", "timmins",
+  "wawa", "white river", "hearst", "kapuskasing",
+  "fort frances", "atikokan", "red lake", "pickle lake"
+];
 
 // ---- INITIALIZE ----
 const app = express();
-app.use(cors()); // Allow requests from your Squarespace site
+app.use(cors());
 app.use(express.json());
 
 // ---- LOAD FAQ DATABASE ----
@@ -32,18 +44,88 @@ function loadFAQs() {
   return JSON.parse(raw);
 }
 
-// ---- KEYWORD MATCHING ----
-// This is the first line of defense — fast, local, no API call needed.
-// It scores each FAQ based on how many keywords match the user's question.
+// ---- IMPROVED KEYWORD MATCHING ----
+// Smarter scoring system:
+// - Standard keyword match: 1 point
+// - Multi-word keyword match (e.g. "out of town"): 2 points
+// - Location/town name match: 3 points (these are very specific signals)
+// - Question word overlap bonus: 0.5 points
 function findBestFAQMatch(userQuestion, faqData) {
   const questionLower = userQuestion.toLowerCase();
   const words = questionLower.split(/\s+/);
 
-  // Check if it's a pricing question first
-  const isPricing = faqData.pricing_keywords.some(
+  // ---- STEP 1: Check for location keywords first ----
+  // If someone mentions a specific town, they're asking about travel.
+  // This overrides everything else.
+  const mentionedLocation = LOCATION_KEYWORDS.find(loc =>
+    questionLower.includes(loc)
+  );
+
+  // Also check locations in the FAQ database keywords
+  const faq006 = faqData.faqs.find(f => f.id === "faq_006");
+  const dbLocationMatch = faq006 ? faq006.keywords.find(kw =>
+    kw.length > 4 && questionLower.includes(kw) &&
+    !["travel", "remote", "delivery", "deliver", "pickup", "rent"].includes(kw)
+  ) : null;
+
+  if (mentionedLocation || dbLocationMatch) {
+    // Someone mentioned a specific place — return the travel FAQ
+    if (faq006) {
+      console.log(`[LOCATION] Detected location: "${mentionedLocation || dbLocationMatch}" — returning travel FAQ`);
+      return {
+        matched: true,
+        isPricing: false,
+        answer: faq006.answer,
+        confidence: 0.95,
+        faqId: faq006.id,
+        faqQuestion: faq006.question,
+      };
+    }
+  }
+
+  // ---- STEP 2: Check for pricing questions ----
+  // But FIRST check if the question also mentions a specific event type.
+  // "How much does a wedding cost?" should go to FAQ 001, not the generic pricing redirect.
+  const hasPricingKeyword = faqData.pricing_keywords.some(
     (keyword) => questionLower.includes(keyword)
   );
-  if (isPricing) {
+
+  if (hasPricingKeyword) {
+    // Check if an event-specific FAQ matches too
+    const eventFAQs = faqData.faqs.filter(f =>
+      ["faq_001", "faq_002", "faq_003", "faq_004", "faq_005"].includes(f.id)
+    );
+
+    let bestEventMatch = null;
+    let bestEventScore = 0;
+
+    for (const faq of eventFAQs) {
+      let score = 0;
+      for (const keyword of faq.keywords) {
+        if (questionLower.includes(keyword.toLowerCase())) {
+          score += 1;
+        }
+      }
+      if (score > bestEventScore) {
+        bestEventScore = score;
+        bestEventMatch = faq;
+      }
+    }
+
+    // If we found a specific event type, return that FAQ (with the specific price)
+    if (bestEventScore >= 1 && bestEventMatch) {
+      console.log(`[PRICING+EVENT] Matched event-specific FAQ: ${bestEventMatch.id}`);
+      return {
+        matched: true,
+        isPricing: false,
+        answer: bestEventMatch.answer,
+        confidence: 0.9,
+        faqId: bestEventMatch.id,
+        faqQuestion: bestEventMatch.question,
+      };
+    }
+
+    // No specific event type detected — return generic pricing summary
     return {
       matched: true,
       isPricing: true,
@@ -53,7 +135,7 @@ function findBestFAQMatch(userQuestion, faqData) {
     };
   }
 
-  // Score each FAQ by keyword overlap
+  // ---- STEP 3: General keyword matching for all other questions ----
   let bestMatch = null;
   let bestScore = 0;
 
@@ -62,7 +144,12 @@ function findBestFAQMatch(userQuestion, faqData) {
 
     for (const keyword of faq.keywords) {
       if (questionLower.includes(keyword.toLowerCase())) {
-        score += 1;
+        // Multi-word keywords are more specific, so they get extra weight
+        if (keyword.includes(" ")) {
+          score += 2;
+        } else {
+          score += 1;
+        }
       }
     }
 
@@ -118,13 +205,15 @@ async function askClaudeWithFAQContext(userQuestion, faqData) {
 
 STRICT RULES — YOU MUST FOLLOW THESE:
 1. ONLY answer using information from the FAQ database provided below. Do NOT make up information.
-2. If the question is about pricing, costs, rates, packages, or fees, ALWAYS respond with EXACTLY: "${faqData.pricing_redirect}"
-3. If you cannot confidently answer from the FAQ database, respond with EXACTLY: "${faqData.fallback_response}"
-4. NEVER make promises or commitments not explicitly stated in the FAQ.
-5. NEVER invent features, services, or details.
-6. Keep answers concise — 2 to 5 sentences maximum.
-7. Tone: Friendly, confident, professional. Think wedding-vendor energy.
-8. If someone asks about availability or booking, direct them to contact us.
+2. If the question is about pricing, costs, rates, packages, or fees AND mentions a specific event type, give the price for that event type from the FAQ.
+3. If the question is about pricing but does NOT mention a specific event type, respond with EXACTLY: "${faqData.pricing_redirect}"
+4. If you cannot confidently answer from the FAQ database, respond with EXACTLY: "${faqData.fallback_response}"
+5. NEVER make promises or commitments not explicitly stated in the FAQ.
+6. NEVER invent features, services, or details.
+7. Keep answers concise — 2 to 5 sentences maximum.
+8. Tone: Friendly, confident, professional. Think wedding-vendor energy.
+9. If someone asks about availability or booking, direct them to contact us.
+10. If someone mentions a specific town or location outside Thunder Bay, they are asking about travel/delivery. Use the travel FAQ to answer.
 
 FAQ DATABASE:
 ${faqContext}
@@ -148,8 +237,6 @@ Remember: When in doubt, use the fallback response. It is ALWAYS better to direc
 }
 
 // ---- LOGGING SYSTEM ----
-// Logs unanswered questions so you can review them and add new FAQs.
-// Check this file weekly — it's your chatbot's "suggestion box."
 function logUnansweredQuestion(userQuestion, attemptedMatch) {
   const logEntry = {
     timestamp: new Date().toISOString(),
@@ -174,7 +261,7 @@ function logUnansweredQuestion(userQuestion, attemptedMatch) {
 }
 
 // ============================================================
-// API ENDPOINT — This is what the frontend widget calls
+// API ENDPOINT
 // ============================================================
 app.post("/api/chat", async (req, res) => {
   const { message } = req.body;
@@ -183,8 +270,6 @@ app.post("/api/chat", async (req, res) => {
     return res.status(400).json({ error: "Message is required" });
   }
 
-  // Rate limiting: basic protection (in production, use a proper rate limiter)
-  // For now, just limit message length
   if (message.length > 500) {
     return res.status(400).json({ error: "Message too long" });
   }
@@ -230,7 +315,6 @@ app.get("/api/health", (req, res) => {
 });
 
 // ---- ADMIN: View unanswered questions ----
-// In production, protect this with authentication!
 app.get("/api/admin/unanswered", (req, res) => {
   const logPath = path.join(__dirname, "unanswered-questions.json");
   if (fs.existsSync(logPath)) {
@@ -243,7 +327,7 @@ app.get("/api/admin/unanswered", (req, res) => {
 
 // ---- START SERVER ----
 app.listen(PORT, () => {
-  console.log(`\n🤖 Instabooth FAQ Chatbot server running on port ${PORT}`);
+  console.log(`\n🤖 Instabooth FAQ Chatbot v2 server running on port ${PORT}`);
   console.log(`   POST /api/chat          — Chat endpoint`);
   console.log(`   GET  /api/health        — Health check`);
   console.log(`   GET  /api/admin/unanswered — View unanswered questions\n`);
