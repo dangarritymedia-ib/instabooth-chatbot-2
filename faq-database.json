@@ -1,52 +1,117 @@
 {
-  "version": "1.0",
-  "last_updated": "2026-03-03",
+  "version": "2.0",
+  "last_updated": "2026-03-10",
   "faqs": [
     {
       "id": "faq_001",
-      "keywords": ["how", "work", "booth", "operate", "function", "digital", "selfie"],
-      "question": "How does your booth work?",
-      "answer": "We are 100% Digital Selfie Booth. We run every event unattended with someone on call just in case. Photos are sent directly from the booth to your phone via wifi & a full gallery is sent to whoever made the booking."
+      "keywords": ["wedding", "weddings", "married", "getting married", "reception", "bride", "groom", "bridal"],
+      "question": "How much does a wedding cost?",
+      "answer": "We keep it simple — $650 for the whole night. We set up before the reception and tear down after last call. No hourly rates, no clock-watching, no dragging the booth away from drunk wedding guests at midnight because it was only booked for 4 hours. Your guests get to enjoy Instabooth all night long."
     },
     {
       "id": "faq_002",
-      "keywords": ["custom", "graphics", "design", "template", "extra", "cost", "charge"],
-      "question": "Does it cost extra to get custom graphics for our event?",
-      "answer": "NO. Every event gets custom graphics FREE."
+      "keywords": ["school", "grad", "graduation", "formal", "prom", "dance", "students", "high school", "elementary"],
+      "question": "How much does a school event, grad, or formal cost?",
+      "answer": "We offer a discounted rate of $375 for school events. Whether it's a dance-a-thon, formal, or graduation party, we try to keep costs lower because every school deserves a selfie booth at the party!"
     },
     {
       "id": "faq_003",
-      "keywords": ["space", "room", "size", "dimensions", "fit", "area", "big", "large", "small"],
-      "question": "How much space does it take up?",
-      "answer": "The background is 8ft by 8ft and goes flat against the wall. Instabooth is positioned about 6 feet away from the background. If height is an issue we do not need to use one of our backgrounds and you can DIY one if needed or the wedding decorator can create something that works."
+      "keywords": ["staff", "christmas", "holiday", "office", "corporate", "company", "work", "team", "employee"],
+      "question": "How much does a staff party or Christmas party cost?",
+      "answer": "Staff and Christmas parties are $450. We drop off before the party starts and pick up after last call. Fair warning — drink and selfie responsibly. You have to go to work with these people tomorrow!"
     },
     {
       "id": "faq_004",
-      "keywords": ["need", "require", "setup", "set up", "power", "wifi", "electricity", "requirements"],
-      "question": "What do you need to be able to set up at our event?",
-      "answer": "We need a power source, a wifi connection & to be protected from the elements."
+      "keywords": ["family", "house", "home", "birthday", "anniversary", "party", "hall", "reunion", "gathering"],
+      "question": "How much does a family event or house party cost?",
+      "answer": "We offer a special rate of $250 for house parties and $450 for family events in a hall. Just a heads up — our backdrops don't usually fit in most homes unless you have 9ft+ ceilings, so house party pricing doesn't include a backdrop."
     },
     {
       "id": "faq_005",
-      "keywords": ["outside", "outdoor", "tent", "garden", "patio", "rain", "weather", "elements"],
-      "question": "Can it go outside?",
-      "answer": "Yes it can go outside but it needs to be under a tent or awning. Generally the backgrounds won't work in a tent unless it's super tall as the backdrops are 8ft high. Either the decorator will need to come up with a backdrop, you can DIY one or the white wall of the tent usually works fine too. Wifi can sometimes be an issue depending on how far away the tent is from the router or modem. All photos are saved to the device and will send out once the photobooth gets back to the office after the event."
+      "keywords": ["charity", "fundraiser", "fundraising", "nonprofit", "non-profit", "gala", "donate", "donation", "free", "discount"],
+      "question": "How much does a charity event cost? Are there discounts?",
+      "answer": "We appreciate the hard work that goes into supporting local charities, so we offer a discounted rate of $375 for charity events. We even give away one free charity event per month! Reach out early and ask if we've awarded the free event for the month your event is happening."
     },
     {
       "id": "faq_006",
-      "keywords": ["wifi", "no wifi", "internet", "connection", "offline", "signal"],
-      "question": "What happens if there is no wifi?",
-      "answer": "All photos are saved to the device and will send out once the photobooth gets back to the office after the event."
+      "keywords": ["out of town", "travel", "far", "distance", "deliver", "delivery", "ship", "remote", "outside thunder bay", "pickup", "self serve", "rent"],
+      "question": "What happens if the event is out of town or far away?",
+      "answer": "We've got two options for out-of-town events. Option one is our self-serve pickup — someone attending the event picks up Instabooth from our studio, brings it to the venue, and sets it up using our instruction videos (it's super easy). You tear down and return it within 48 hours. Option two is we handle everything — delivery, setup, and teardown — for an added travel and downtime fee. It usually comes out to around $1,000, but reach out and we can discuss your specific location and needs."
     },
     {
       "id": "faq_007",
-      "keywords": ["outside", "thunder bay", "travel", "distance", "far", "deliver", "location", "rent", "ship"],
-      "question": "Do you rent outside of Thunder Bay?",
-      "answer": "Yes we can either send the photobooth with someone from the wedding party with a how-to video for set up, or we can come do set up and teardown for an added charge. It all depends on how far away the event is."
+      "keywords": ["advance", "book", "booking", "reserve", "available", "availability", "last minute", "when", "how early", "timeline", "schedule"],
+      "question": "How far in advance do we need to book?",
+      "answer": "The more notice the better, but honestly, we've pulled off events the same day we got the call — we thrive under pressure. We have 6 booths, so we can usually make any timeline work. That said, booking early means you get first pick of backdrops, which matters if there are multiple events on the same day."
+    },
+    {
+      "id": "faq_008",
+      "keywords": ["backdrop", "backdrops", "background", "backgrounds", "curtain", "options", "choose", "selection", "fabric"],
+      "question": "What backdrop options do you have?",
+      "answer": "We have 25+ backdrops to choose from! It's first come, first served when we have multiple bookings on the same day, so the sooner you book, the sooner you lock in the perfect backdrop for your event. Check them all out at instaboothtbay.com/backdrops"
+    },
+    {
+      "id": "faq_009",
+      "keywords": ["start screen", "overlay", "difference", "graphics", "digital", "screen", "template", "design"],
+      "question": "What's the difference between the start screen and overlay vs. the backdrop?",
+      "answer": "The start screen and overlay are your custom digital graphics. The start screen is what guests see on Instabooth's screen when they walk up to it. They tap to start, snap a selfie, and then the overlay — a set of graphics we designed just for your event — gets layered onto the photo. The backdrop is a separate thing entirely — it's a physical 8ft x 8ft fabric background that goes behind where guests stand. We have 25+ options you can browse at instaboothtbay.com/backdrops"
+    },
+    {
+      "id": "faq_010",
+      "keywords": ["create", "graphics", "custom", "design", "extra", "cost", "customize", "personalize", "branding", "logo", "theme", "invitation"],
+      "question": "How do you create the graphics? Does it cost extra?",
+      "answer": "Every event gets custom graphics at no extra cost. We ask for an invitation (digital is best) or the theme of your event and build from there. If you have the digital working file of the invitation, that's ideal because we can break it apart and rebuild the graphics exactly how we want. Otherwise, we create something from scratch to match your style."
+    },
+    {
+      "id": "faq_011",
+      "keywords": ["outside", "outdoor", "tent", "garden", "patio", "rain", "weather", "sun", "sunny", "awning", "elements", "yard"],
+      "question": "Can the photo booth go outside?",
+      "answer": "Short answer — yes! It works best under a tent or awning to avoid weather issues. Backdrops can be tricky in tents because they're just shy of 8ft tall, so our standard ones don't always fit. We do have a gold and white option and a gold and black option that work for outdoor tent events. Also, if it's really hot and sunny without shade, the screen can be hard to see and the booth can overheat. Reach out with your specific venue details and we can give you a better answer."
+    },
+    {
+      "id": "faq_012",
+      "keywords": ["wifi", "no wifi", "internet", "connection", "offline", "signal", "data", "sharing", "send", "photos"],
+      "question": "Does Instabooth work without wifi?",
+      "answer": "Yes, it works without wifi, but a strong wifi signal is ideal so guests can get instant sharing. If there's no wifi, everything gets saved to the hard drive and will start sending out once Instabooth makes it back to our studio and connects to our wifi. We prefer the venue's actual wifi connection because the free TbayTel wifi tends to drop out during events. Most halls in town have wifi we can connect to — the only tricky spots are some of the barn-style venues, but even they're starting to look into Starlink!"
+    },
+    {
+      "id": "faq_013",
+      "keywords": ["need", "require", "setup", "set up", "power", "electricity", "space", "room", "requirements", "what do you need", "extension", "table"],
+      "question": "What do you need for the booth to work?",
+      "answer": "We need a power source nearby (we also carry 100ft extension cords just in case), a reliable wifi signal with the password to connect, and about 8 square feet of space for the backdrop and booth setup. Oh, and a small table for props!"
+    },
+    {
+      "id": "faq_014",
+      "keywords": ["first nation", "reserve", "remote", "fly", "plane", "northern", "indigenous", "community"],
+      "question": "Can you travel to remote First Nation reserves?",
+      "answer": "Absolutely — we pride ourselves on finding solutions to make pretty much any event work. There's a small fee for the extended timeline. The best option for remote events is usually our self-setup package. Instabooth doesn't take up much room if you need to put it on a plane, and since we have 6 booths, we have the flexibility for an extended pickup and return timeline."
+    },
+    {
+      "id": "faq_015",
+      "keywords": ["black and white", "black & white", "b&w", "filter", "monochrome", "minimalist", "classic"],
+      "question": "Can you do black and white photos?",
+      "answer": "Yes! We can set the filter to black and white in the preset settings, and we often pair it with minimalistic graphics for a really clean look. We've got some examples we can share — just hit the Book Now button and tell us about your event."
+    },
+    {
+      "id": "faq_016",
+      "keywords": ["gif", "gifs", "boomerang", "video", "animation", "moving", "only photos", "just photos", "types", "formats"],
+      "question": "Does the booth only do photos?",
+      "answer": "Nope! Instabooth does photos, GIFs, and boomerangs — all available to guests right on the screen. We've got a rapid-fire GIF option that snaps 4 photos in a row and slams them into a fun 4-frame GIF (but you gotta move fast!), a timed GIF option with a countdown between shots to give you setup time, a boomerang that shoots a 2-second clip playing forwards then backwards, and of course the classic single-frame photo."
+    },
+    {
+      "id": "faq_017",
+      "keywords": ["360", "three sixty", "video booth", "spinning", "rotating", "platform"],
+      "question": "Do you have a 360 photo booth?",
+      "answer": "We made the deliberate decision not to offer a 360 booth. We've built a very specific workflow and event experience that lets us run completely unmanned events with minimal risk of hiccups like printer errors or mechanical malfunctions. What we do offer is a sleek selfie station with beautiful lighting, stunning custom graphics, quick instant sharing, and tons of laughs — with no awkward teenager running the booth and making small talk while you're trying to act silly with your friends."
     }
   ],
-  "pricing_redirect": "Send us a message and we'll build a custom quote for your event.",
-  "fallback_response": "That's a great question! I don't have a specific answer for that one yet, but our team would love to help. Send us a message through our contact page and we'll get back to you quickly.",
-  "pricing_keywords": ["price", "pricing", "cost", "how much", "rate", "rates", "package", "packages", "quote", "fee", "fees", "charge", "affordable", "expensive", "budget", "deal", "discount", "deposit", "payment"],
-  "restricted_topics": ["We don't provide specific pricing through the chatbot.", "We can't make guarantees about availability without checking our calendar.", "We don't share other clients' event details."]
+  "pricing_keywords": ["price", "pricing", "cost", "how much", "rate", "rates", "package", "packages", "quote", "fee", "fees", "affordable", "expensive", "budget", "deal", "deposit", "payment"],
+  "pricing_note": "NOTE: Pricing questions should be matched to specific event type FAQs (001-005) first. Only use the generic pricing redirect if no specific event type is detected.",
+  "pricing_redirect": "Our pricing depends on the type of event! Weddings are $650, school events and charity events are $375, staff/Christmas parties are $450, family events in a hall are $450, and house parties are $250. Want a quote for your specific event? Click here to reach out: https://instaboothtbay.com/#book",
+  "fallback_response": "That's a great question — I haven't heard that one before! You should shoot us a message so we can give you a proper answer. Click here to fill out the form: https://instaboothtbay.com/#book",
+  "restricted_topics": [
+    "We don't make guarantees about availability without checking our calendar.",
+    "We don't share other clients' event details.",
+    "We don't make promises that aren't listed in our FAQ."
+  ]
 }
