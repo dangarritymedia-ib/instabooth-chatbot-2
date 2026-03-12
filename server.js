@@ -1,11 +1,12 @@
 // ============================================================
-// INSTABOOTH FAQ CHATBOT — BACKEND SERVER (v2)
+// INSTABOOTH FAQ CHATBOT — BACKEND SERVER (v3)
 // ============================================================
-// Improved matching logic:
-// - Location names (town names) get 3x weight
-// - Multi-word keyword matches get 2x weight
-// - Pricing questions check for event-specific FAQs first
-// - Better handling of multi-topic questions
+// What's new in v3:
+// - Full analytics logging (every question, not just unanswered)
+// - Daily usage counter
+// - FAQ popularity tracking
+// - /api/admin/stats endpoint for a quick summary
+// - /api/admin/log endpoint for full conversation history
 // ============================================================
 
 const express = require("express");
@@ -19,9 +20,6 @@ const PORT = process.env.PORT || 3001;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // ---- LOCATION KEYWORDS ----
-// These are specific place names that should carry heavy weight
-// because if someone mentions a town, they're almost certainly
-// asking about travel/delivery, not about that town's wedding prices.
 const LOCATION_KEYWORDS = [
   "nipigon", "terrace bay", "schreiber", "kenora", "dryden",
   "marathon", "sioux lookout", "geraldton", "longlac",
@@ -35,34 +33,76 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ---- FILE PATHS ----
+const FAQ_PATH = path.join(__dirname, "faq-database.json");
+const ANALYTICS_PATH = path.join(__dirname, "analytics-log.json");
+const UNANSWERED_PATH = path.join(__dirname, "unanswered-questions.json");
+
 // ---- LOAD FAQ DATABASE ----
 function loadFAQs() {
-  const raw = fs.readFileSync(
-    path.join(__dirname, "faq-database.json"),
-    "utf-8"
-  );
+  const raw = fs.readFileSync(FAQ_PATH, "utf-8");
   return JSON.parse(raw);
 }
 
+// ---- ANALYTICS LOGGING ----
+// Logs EVERY question with timestamp, what was asked, which FAQ matched,
+// the source (faq_database, pricing_redirect, claude_api, fallback), and confidence.
+function logConversation(userQuestion, result) {
+  const entry = {
+    timestamp: new Date().toISOString(),
+    date: new Date().toISOString().split("T")[0],
+    question: userQuestion,
+    matchedFaqId: result.faqId || null,
+    source: result.source || "unknown",
+    confidence: result.confidence || 0,
+  };
+
+  let logs = [];
+  if (fs.existsSync(ANALYTICS_PATH)) {
+    try {
+      logs = JSON.parse(fs.readFileSync(ANALYTICS_PATH, "utf-8"));
+    } catch {
+      logs = [];
+    }
+  }
+
+  logs.push(entry);
+  fs.writeFileSync(ANALYTICS_PATH, JSON.stringify(logs, null, 2));
+  console.log(`[ANALYTICS] ${entry.date} | Source: ${entry.source} | FAQ: ${entry.matchedFaqId} | Q: "${userQuestion}"`);
+}
+
+// ---- UNANSWERED QUESTION LOGGING ----
+function logUnansweredQuestion(userQuestion, attemptedMatch) {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    question: userQuestion,
+    attemptedMatch: attemptedMatch,
+  };
+
+  let logs = [];
+  if (fs.existsSync(UNANSWERED_PATH)) {
+    try {
+      logs = JSON.parse(fs.readFileSync(UNANSWERED_PATH, "utf-8"));
+    } catch {
+      logs = [];
+    }
+  }
+
+  logs.push(logEntry);
+  fs.writeFileSync(UNANSWERED_PATH, JSON.stringify(logs, null, 2));
+  console.log(`[LOG] Unanswered question: "${userQuestion}"`);
+}
+
 // ---- IMPROVED KEYWORD MATCHING ----
-// Smarter scoring system:
-// - Standard keyword match: 1 point
-// - Multi-word keyword match (e.g. "out of town"): 2 points
-// - Location/town name match: 3 points (these are very specific signals)
-// - Question word overlap bonus: 0.5 points
 function findBestFAQMatch(userQuestion, faqData) {
   const questionLower = userQuestion.toLowerCase();
   const words = questionLower.split(/\s+/);
 
-  // ---- STEP 1: Check for location keywords first ----
-  // If someone mentions a specific town, they're asking about travel.
-  // This overrides everything else.
+  // STEP 1: Check for location keywords first
   const mentionedLocation = LOCATION_KEYWORDS.find(loc =>
     questionLower.includes(loc)
   );
 
-  // Also check locations in the FAQ database keywords — but ONLY actual place names,
-  // not generic phrases like "how far" or "out of town" which could match other questions
   const GENERIC_TRAVEL_PHRASES = [
     "travel", "remote", "delivery", "deliver", "pickup", "rent",
     "out of town", "outside thunder bay", "self serve", "come to",
@@ -75,7 +115,6 @@ function findBestFAQMatch(userQuestion, faqData) {
   ) : null;
 
   if (mentionedLocation || dbLocationMatch) {
-    // Someone mentioned a specific place — return the travel FAQ
     if (faq006) {
       console.log(`[LOCATION] Detected location: "${mentionedLocation || dbLocationMatch}" — returning travel FAQ`);
       return {
@@ -89,15 +128,12 @@ function findBestFAQMatch(userQuestion, faqData) {
     }
   }
 
-  // ---- STEP 2: Check for pricing questions ----
-  // But FIRST check if the question also mentions a specific event type.
-  // "How much does a wedding cost?" should go to FAQ 001, not the generic pricing redirect.
+  // STEP 2: Check for pricing questions
   const hasPricingKeyword = faqData.pricing_keywords.some(
     (keyword) => questionLower.includes(keyword)
   );
 
   if (hasPricingKeyword) {
-    // Check if an event-specific FAQ matches too
     const eventFAQs = faqData.faqs.filter(f =>
       ["faq_001", "faq_002", "faq_003", "faq_004", "faq_005"].includes(f.id)
     );
@@ -118,7 +154,6 @@ function findBestFAQMatch(userQuestion, faqData) {
       }
     }
 
-    // If we found a specific event type, return that FAQ (with the specific price)
     if (bestEventScore >= 1 && bestEventMatch) {
       console.log(`[PRICING+EVENT] Matched event-specific FAQ: ${bestEventMatch.id}`);
       return {
@@ -131,7 +166,6 @@ function findBestFAQMatch(userQuestion, faqData) {
       };
     }
 
-    // No specific event type detected — return generic pricing summary
     return {
       matched: true,
       isPricing: true,
@@ -141,7 +175,7 @@ function findBestFAQMatch(userQuestion, faqData) {
     };
   }
 
-  // ---- STEP 3: General keyword matching for all other questions ----
+  // STEP 3: General keyword matching
   let bestMatch = null;
   let bestScore = 0;
 
@@ -150,7 +184,6 @@ function findBestFAQMatch(userQuestion, faqData) {
 
     for (const keyword of faq.keywords) {
       if (questionLower.includes(keyword.toLowerCase())) {
-        // Multi-word keywords are more specific, so they get extra weight
         if (keyword.includes(" ")) {
           score += 2;
         } else {
@@ -159,7 +192,6 @@ function findBestFAQMatch(userQuestion, faqData) {
       }
     }
 
-    // Bonus: check if the user's question words appear in the FAQ question
     const faqQuestionLower = faq.question.toLowerCase();
     for (const word of words) {
       if (word.length > 3 && faqQuestionLower.includes(word)) {
@@ -173,7 +205,6 @@ function findBestFAQMatch(userQuestion, faqData) {
     }
   }
 
-  // Require at least 2 keyword hits for a confident match
   if (bestScore >= 2 && bestMatch) {
     return {
       matched: true,
@@ -189,9 +220,6 @@ function findBestFAQMatch(userQuestion, faqData) {
 }
 
 // ---- CLAUDE API FALLBACK ----
-// Only called when keyword matching doesn't find a confident match.
-// Claude is given the ENTIRE FAQ database as context and told to ONLY
-// use information from it. This prevents hallucination.
 async function askClaudeWithFAQContext(userQuestion, faqData) {
   if (!ANTHROPIC_API_KEY) {
     return {
@@ -202,7 +230,6 @@ async function askClaudeWithFAQContext(userQuestion, faqData) {
 
   const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
-  // Build the FAQ context string
   const faqContext = faqData.faqs
     .map((f) => `Q: ${f.question}\nA: ${f.answer}`)
     .join("\n\n");
@@ -242,32 +269,8 @@ Remember: When in doubt, use the fallback response. It is ALWAYS better to direc
   }
 }
 
-// ---- LOGGING SYSTEM ----
-function logUnansweredQuestion(userQuestion, attemptedMatch) {
-  const logEntry = {
-    timestamp: new Date().toISOString(),
-    question: userQuestion,
-    attemptedMatch: attemptedMatch,
-  };
-
-  const logPath = path.join(__dirname, "unanswered-questions.json");
-
-  let logs = [];
-  if (fs.existsSync(logPath)) {
-    try {
-      logs = JSON.parse(fs.readFileSync(logPath, "utf-8"));
-    } catch {
-      logs = [];
-    }
-  }
-
-  logs.push(logEntry);
-  fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
-  console.log(`[LOG] Unanswered question: "${userQuestion}"`);
-}
-
 // ============================================================
-// API ENDPOINT
+// MAIN CHAT ENDPOINT
 // ============================================================
 app.post("/api/chat", async (req, res) => {
   const { message } = req.body;
@@ -283,13 +286,19 @@ app.post("/api/chat", async (req, res) => {
   const faqData = loadFAQs();
   const userQuestion = message.trim();
 
-  // STEP 1: Try keyword matching first (fast, free, no API call)
+  // STEP 1: Try keyword matching first
   const keywordMatch = findBestFAQMatch(userQuestion, faqData);
 
   if (keywordMatch.matched) {
-    console.log(
-      `[MATCH] FAQ match found: ${keywordMatch.faqId} (confidence: ${keywordMatch.confidence})`
-    );
+    console.log(`[MATCH] FAQ match found: ${keywordMatch.faqId} (confidence: ${keywordMatch.confidence})`);
+
+    // Log to analytics
+    logConversation(userQuestion, {
+      faqId: keywordMatch.faqId,
+      source: keywordMatch.isPricing ? "pricing_redirect" : "faq_database",
+      confidence: keywordMatch.confidence,
+    });
+
     return res.json({
       answer: keywordMatch.answer,
       source: keywordMatch.isPricing ? "pricing_redirect" : "faq_database",
@@ -298,11 +307,18 @@ app.post("/api/chat", async (req, res) => {
     });
   }
 
-  // STEP 2: No confident keyword match — ask Claude with FAQ context
+  // STEP 2: No confident keyword match — ask Claude
   console.log(`[CLAUDE] No keyword match for: "${userQuestion}"`);
   const claudeResult = await askClaudeWithFAQContext(userQuestion, faqData);
 
-  // STEP 3: Log the question if it wasn't a direct FAQ match
+  // Log to analytics
+  logConversation(userQuestion, {
+    faqId: null,
+    source: claudeResult.source,
+    confidence: 0,
+  });
+
+  // Log to unanswered questions
   logUnansweredQuestion(userQuestion, {
     claudeAnswer: claudeResult.answer,
     source: claudeResult.source,
@@ -315,26 +331,131 @@ app.post("/api/chat", async (req, res) => {
   });
 });
 
-// ---- HEALTH CHECK ----
+// ============================================================
+// ADMIN ENDPOINTS
+// ============================================================
+
+// ---- Health Check ----
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// ---- ADMIN: View unanswered questions ----
+// ---- View unanswered questions ----
 app.get("/api/admin/unanswered", (req, res) => {
-  const logPath = path.join(__dirname, "unanswered-questions.json");
-  if (fs.existsSync(logPath)) {
-    const logs = JSON.parse(fs.readFileSync(logPath, "utf-8"));
+  if (fs.existsSync(UNANSWERED_PATH)) {
+    const logs = JSON.parse(fs.readFileSync(UNANSWERED_PATH, "utf-8"));
     res.json(logs);
   } else {
     res.json([]);
   }
 });
 
+// ---- View full conversation log ----
+app.get("/api/admin/log", (req, res) => {
+  if (fs.existsSync(ANALYTICS_PATH)) {
+    const logs = JSON.parse(fs.readFileSync(ANALYTICS_PATH, "utf-8"));
+    res.json(logs);
+  } else {
+    res.json([]);
+  }
+});
+
+// ---- Stats dashboard ----
+// Visit: instabooth-chatbot-2-production.up.railway.app/api/admin/stats
+app.get("/api/admin/stats", (req, res) => {
+  if (!fs.existsSync(ANALYTICS_PATH)) {
+    return res.json({
+      message: "No data yet — waiting for first chatbot conversation!",
+      totalQuestions: 0,
+    });
+  }
+
+  const logs = JSON.parse(fs.readFileSync(ANALYTICS_PATH, "utf-8"));
+
+  // ---- Total questions all time ----
+  const totalQuestions = logs.length;
+
+  // ---- Questions today ----
+  const today = new Date().toISOString().split("T")[0];
+  const todayQuestions = logs.filter(l => l.date === today).length;
+
+  // ---- Questions by day (last 14 days) ----
+  const dailyCounts = {};
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+  logs.forEach(l => {
+    if (new Date(l.date) >= fourteenDaysAgo) {
+      dailyCounts[l.date] = (dailyCounts[l.date] || 0) + 1;
+    }
+  });
+
+  // Sort by date
+  const dailyUsage = Object.entries(dailyCounts)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, count]) => ({ date, questions: count }));
+
+  // ---- Source breakdown ----
+  const sourceCounts = {};
+  logs.forEach(l => {
+    sourceCounts[l.source] = (sourceCounts[l.source] || 0) + 1;
+  });
+
+  // ---- FAQ popularity (which FAQs get hit most) ----
+  const faqCounts = {};
+  logs.forEach(l => {
+    if (l.matchedFaqId) {
+      faqCounts[l.matchedFaqId] = (faqCounts[l.matchedFaqId] || 0) + 1;
+    }
+  });
+
+  // Sort by popularity
+  const faqPopularity = Object.entries(faqCounts)
+    .sort(([, a], [, b]) => b - a)
+    .map(([faqId, count]) => ({ faqId, timesTriggered: count }));
+
+  // ---- Unanswered count ----
+  let unansweredCount = 0;
+  if (fs.existsSync(UNANSWERED_PATH)) {
+    try {
+      const unanswered = JSON.parse(fs.readFileSync(UNANSWERED_PATH, "utf-8"));
+      unansweredCount = unanswered.length;
+    } catch {
+      unansweredCount = 0;
+    }
+  }
+
+  // ---- Recent questions (last 10) ----
+  const recentQuestions = logs.slice(-10).reverse().map(l => ({
+    time: l.timestamp,
+    question: l.question,
+    source: l.source,
+    faqId: l.matchedFaqId,
+  }));
+
+  // ---- Build response ----
+  res.json({
+    summary: {
+      totalQuestionsAllTime: totalQuestions,
+      questionsToday: todayQuestions,
+      unansweredQuestions: unansweredCount,
+      faqMatchRate: totalQuestions > 0
+        ? Math.round((logs.filter(l => l.source === "faq_database").length / totalQuestions) * 100) + "%"
+        : "0%",
+    },
+    dailyUsage,
+    sourceBreakdown: sourceCounts,
+    faqPopularity,
+    recentQuestions,
+  });
+});
+
 // ---- START SERVER ----
 app.listen(PORT, () => {
-  console.log(`\n🤖 Instabooth FAQ Chatbot v2 server running on port ${PORT}`);
-  console.log(`   POST /api/chat          — Chat endpoint`);
-  console.log(`   GET  /api/health        — Health check`);
-  console.log(`   GET  /api/admin/unanswered — View unanswered questions\n`);
+  console.log(`\n🤖 Instabooth FAQ Chatbot v3 server running on port ${PORT}`);
+  console.log(`   POST /api/chat              — Chat endpoint`);
+  console.log(`   GET  /api/health            — Health check`);
+  console.log(`   GET  /api/admin/unanswered  — View unanswered questions`);
+  console.log(`   GET  /api/admin/log         — Full conversation history`);
+  console.log(`   GET  /api/admin/stats       — Analytics dashboard\n`);
 });
