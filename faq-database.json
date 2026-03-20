@@ -1,6 +1,6 @@
 {
-  "version": "2.1",
-  "last_updated": "2026-03-11",
+  "version": "2.2",
+  "last_updated": "2026-03-12",
   "faqs": [
     {
       "id": "faq_001",
@@ -48,7 +48,7 @@
       "id": "faq_008",
       "keywords": ["backdrop", "backdrops", "background", "backgrounds", "curtain", "options", "choose", "selection", "fabric"],
       "question": "What backdrop options do you have?",
-      "answer": "We have 30+ backdrops to choose from! It's first come, first served when we have multiple bookings on the same day, so the sooner you book, the sooner you lock in the perfect backdrop for your event. Check them all out at https://instaboothtbay.com/backdrops"
+      "answer": "We have 25+ backdrops to choose from! It's first come, first served when we have multiple bookings on the same day, so the sooner you book, the sooner you lock in the perfect backdrop for your event. Check them all out at https://instaboothtbay.com/backdrops"
     },
     {
       "id": "faq_009",
@@ -103,6 +103,30 @@
       "keywords": ["360", "three sixty", "video booth", "spinning", "rotating", "platform"],
       "question": "Do you have a 360 photo booth?",
       "answer": "We made the deliberate decision not to offer a 360 booth. We've built a very specific workflow and event experience that lets us run completely unmanned events with minimal risk of hiccups like printer errors or mechanical malfunctions. What we do offer is a sleek selfie station with beautiful lighting, stunning custom graphics, quick instant sharing, and tons of laughs — with no awkward teenager running the booth and making small talk while you're trying to act silly with your friends."
+    },
+    {
+      "id": "faq_018",
+      "keywords": ["how", "work", "works", "use", "operate", "what happens", "process", "step", "explain", "tap", "simple"],
+      "question": "How does it work?",
+      "answer": "It's simple. Guests tap the screen to begin, choose between an animated GIF or still photos, and our system applies your custom graphic overlay. The photos are sent instantly to the user, and the event organizer receives the full gallery the following day."
+    },
+    {
+      "id": "faq_019",
+      "keywords": ["why", "better", "best", "choose", "over", "compared", "competition", "competitor", "different", "stand out", "special", "unique", "advantage"],
+      "question": "Why should I book you over other photobooth companies?",
+      "answer": "We offer the largest selection of photobooths in town and bring years of experience to every event. We're flexible with timelines, perform well under pressure, and include custom graphics at no extra cost. Plus, we offer a wide variety of backgrounds to suit any event style."
+    },
+    {
+      "id": "faq_020",
+      "keywords": ["what are graphics", "what do you mean", "graphics mean", "what is a graphic", "overlay mean", "explain graphics"],
+      "question": "What do you mean by graphics?",
+      "answer": "Graphics are custom-designed elements created specifically for your event. This includes a personalized start screen on the booth and a custom overlay applied to each photo. We tailor everything to match your theme, colours, and overall event style."
+    },
+    {
+      "id": "faq_021",
+      "keywords": ["ready to book", "book now", "next step", "next steps", "how do i book", "sign up", "get started", "reserve", "lock in", "email", "contact"],
+      "question": "I'm ready to book, what's next?",
+      "answer": "Great! Just send us an email at InstaboothTBay@gmail.com and we'll reserve your date. From there, we'll walk through all the details together — event timing, location, type of event, and the best graphic options for you. We'll also go over payment and anything else needed to officially lock everything in."
     }
   ],
   "pricing_keywords": ["price", "pricing", "cost", "how much", "rate", "rates", "package", "packages", "quote", "fee", "fees", "affordable", "expensive", "budget", "deal", "deposit", "payment"],
