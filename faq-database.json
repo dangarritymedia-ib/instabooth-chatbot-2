@@ -127,6 +127,12 @@
       "keywords": ["ready to book", "book now", "next step", "next steps", "how do i book", "sign up", "get started", "reserve", "lock in", "email", "contact"],
       "question": "I'm ready to book, what's next?",
       "answer": "Great! Just send us an email at InstaboothTBay@gmail.com and we'll reserve your date. From there, we'll walk through all the details together — event timing, location, type of event, and the best graphic options for you. We'll also go over payment and anything else needed to officially lock everything in."
+    },
+    {
+      "id": "faq_022",
+      "keywords": ["print", "printing", "prints", "printed", "paper", "physical", "hard copy", "printout", "photo strip", "photo strips", "keepsake"],
+      "question": "Do you offer printing?",
+      "answer": "We've chosen to be 100% digital to keep things simple and cost-effective for our clients. Photos are delivered instantly via text, email, QR code, or AirDrop. Guests love the immediate access — and with no limits, everyone can get their photos without worrying about running out of prints or wasting them."
     }
   ],
   "pricing_keywords": ["price", "pricing", "cost", "how much", "rate", "rates", "package", "packages", "quote", "fee", "fees", "affordable", "expensive", "budget", "deal", "deposit", "payment"],
